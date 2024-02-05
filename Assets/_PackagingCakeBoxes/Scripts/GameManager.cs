@@ -98,7 +98,7 @@ public class GameManager : MonoBehaviour
     {
 
         //bool isMap = false;
-        string filePath = Application.dataPath + "/_PackagingCakeBoxes" + "/Level/level2.txt";
+        string filePath = Application.dataPath + "/_PackagingCakeBoxes" + "/Level/level4.txt";
 
         if (!File.Exists(filePath)) return;
 
@@ -189,7 +189,7 @@ public class GameManager : MonoBehaviour
                 {
                     //var height = i++;
                     var width = (int)block.GetComponent<Block>().CurPosArr.y;
-                    if (!mapArray[height, width].GetComponent<GridCell>().isOccupied)
+                    while (!mapArray[height, width].GetComponent<GridCell>().isOccupied)
                     {
                         //GameObject temp = mapArray[i, width];
                         mapArray[i, width].GetComponent<GridCell>().isOccupied = false;
@@ -198,9 +198,26 @@ public class GameManager : MonoBehaviour
                         block.GetComponent<Block>().CurPosArr = new Vector2Int(height, width);
                         mapArray[height, width].GetComponent<GridCell>().isOccupied = true;
 
+                        //Debug.Log("Height: " + height);
+                        var temp = height;
+                        if (++temp < mapHeight)
+                        {
+                            if (!mapArray[temp, width].GetComponent<GridCell>().isOccupied)
+                            {
+                                mapArray[height, width].GetComponent<GridCell>().isOccupied = false;
+                            }
+                            else
+                            {
+                                mapArray[height, width].GetComponent<GridCell>().isOccupied = true;
+                            }
+
+                            height++;
+                        }
                     }
 
                 }
+
+
             }
             if (dir == Vector2.down)
             {
@@ -210,7 +227,7 @@ public class GameManager : MonoBehaviour
                 {
                     //var height = i++;
                     var width = (int)block.GetComponent<Block>().CurPosArr.y;
-                    if (!mapArray[height, width].GetComponent<GridCell>().isOccupied)
+                    while (!mapArray[height, width].GetComponent<GridCell>().isOccupied)
                     {
                         //GameObject temp = mapArray[i, width];
                         mapArray[i, width].GetComponent<GridCell>().isOccupied = false;
@@ -218,7 +235,20 @@ public class GameManager : MonoBehaviour
                         //mapArray[height, width] = temp;
                         block.GetComponent<Block>().CurPosArr = new Vector2Int(height, width);
                         mapArray[height, width].GetComponent<GridCell>().isOccupied = true;
+                        var temp = height;
+                        if (--temp >= 0)
+                        {
+                            if (!mapArray[temp, width].GetComponent<GridCell>().isOccupied)
+                            {
+                                mapArray[height, width].GetComponent<GridCell>().isOccupied = false;
+                            }
+                            else
+                            {
+                                mapArray[height, width].GetComponent<GridCell>().isOccupied = true;
+                            }
 
+                            height--;
+                        }
                     }
                 }
 
@@ -232,7 +262,7 @@ public class GameManager : MonoBehaviour
                 for (j = (int)block.GetComponent<Block>().CurPosArr.y, width = j - 1; j >= 0 && width >= 0; j--)
                 {
                     var height = (int)block.GetComponent<Block>().CurPosArr.x;
-                    if (!mapArray[height, width].GetComponent<GridCell>().isOccupied)
+                    while (!mapArray[height, width].GetComponent<GridCell>().isOccupied)
                     {
                         //GameObject temp = mapArray[i, width];
                         mapArray[height, j].GetComponent<GridCell>().isOccupied = false;
@@ -240,7 +270,19 @@ public class GameManager : MonoBehaviour
                         //mapArray[height, width] = temp;
                         block.GetComponent<Block>().CurPosArr = new Vector2Int(height, width);
                         mapArray[height, width].GetComponent<GridCell>().isOccupied = true;
-
+                        var temp = width;
+                        if (--temp >= 0)
+                        {
+                            if (!mapArray[height, temp].GetComponent<GridCell>().isOccupied)
+                            {
+                                mapArray[height, width].GetComponent<GridCell>().isOccupied = false;
+                            }
+                            else
+                            {
+                                mapArray[height, width].GetComponent<GridCell>().isOccupied = true;
+                            }
+                            width--;
+                        }
                     }
 
 
@@ -262,7 +304,19 @@ public class GameManager : MonoBehaviour
                         //mapArray[height, width] = temp;
                         block.GetComponent<Block>().CurPosArr = new Vector2Int(height, width);
                         mapArray[height, width].GetComponent<GridCell>().isOccupied = true;
-
+                        var temp = width;
+                        if (++temp < mapWidth)
+                        {
+                            if (!mapArray[height, temp].GetComponent<GridCell>().isOccupied)
+                            {
+                                mapArray[height, width].GetComponent<GridCell>().isOccupied = false;
+                            }
+                            else
+                            {
+                                mapArray[height, width].GetComponent<GridCell>().isOccupied = true;
+                            }
+                            width++;
+                        }
                     }
                 }
             }
