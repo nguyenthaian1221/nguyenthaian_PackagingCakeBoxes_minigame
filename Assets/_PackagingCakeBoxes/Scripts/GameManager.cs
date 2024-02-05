@@ -6,7 +6,7 @@ using System.IO;
 using static Unity.Collections.AllocatorManager;
 using System.Linq;
 
-public enum GameState { pause, playing, lose, win };
+public enum GameState { pause, playing, moving, lose, win };
 
 
 public class GameManager : MonoBehaviour
@@ -24,8 +24,8 @@ public class GameManager : MonoBehaviour
     public GameObject[] objects;  // 0 - gird, 1 - cake, 2 - box, 3 - candyblock, 4 - coin 
     public Transform parentGrid;
 
-    private List<GridCell> _nodes;
-    private List<Block> _blocks;
+    //private List<GridCell> _nodes;
+    private List<GameObject> _blocks;
 
 
 
@@ -37,6 +37,7 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
+        _blocks = new List<GameObject>();
         ChangeState(GameState.playing);
         LoadMap();
     }
@@ -93,11 +94,11 @@ public class GameManager : MonoBehaviour
         return mapArray;
     }
 
-    void LoadMap()
+    void LoadMap()  // insert parameter
     {
 
         //bool isMap = false;
-        string filePath = Application.dataPath + "/_PackagingCakeBoxes" + "/Level/level1.txt";
+        string filePath = Application.dataPath + "/_PackagingCakeBoxes" + "/Level/level2.txt";
 
         if (!File.Exists(filePath)) return;
 
@@ -139,10 +140,11 @@ public class GameManager : MonoBehaviour
                             //GameObject.Instantiate(objects[currentNumber], new Vector3(x, mapHeight - 1 - y, 0) * 2, Quaternion.Euler(0, 0, 0)); // place object 
                             mapArray[mapHeight - 1 - y, x].GetComponent<GridCell>().isOccupied = true;
                             GameObject blockObjects = GameObject.Instantiate(objects[currentNumber], mapArray[mapHeight - 1 - y, x].transform.position, Quaternion.Euler(0, 0, 0)) as GameObject; // place object 
-
+                            blockObjects.GetComponent<Block>().SetBlock(mapArray[mapHeight - 1 - y, x].GetComponent<GridCell>());
                             if (currentNumber != 3)  // candyBlock can't move
                             {
-                                blockObjects.GetComponent<MovingObject>().CurPosArr = new Vector2Int(mapHeight - 1 - y, x); //Save init pos
+                                blockObjects.GetComponent<Block>().CurPosArr = new Vector2Int(mapHeight - 1 - y, x); //Save init 
+                                _blocks.Add(blockObjects);
                             }
 
                         }
@@ -173,18 +175,116 @@ public class GameManager : MonoBehaviour
 
     void Shift(Vector2 dir)
     {
+        var orderedBlocks = _blocks.OrderBy(b => b.GetComponent<Block>().Pos.x).ThenBy(b => b.GetComponent<Block>().Pos.y).ToList();
+        if (dir == Vector2.right || dir == Vector2.up) orderedBlocks.Reverse();
+
+        foreach (var block in orderedBlocks)
+        {
+            //Debug.Log(block.name);
+            if (dir == Vector2.up)
+            {
+                int i;
+                int height;
+                for (i = (int)block.GetComponent<Block>().CurPosArr.x, height = i + 1; i < mapHeight && height < mapHeight; i++)
+                {
+                    //var height = i++;
+                    var width = (int)block.GetComponent<Block>().CurPosArr.y;
+                    if (!mapArray[height, width].GetComponent<GridCell>().isOccupied)
+                    {
+                        //GameObject temp = mapArray[i, width];
+                        mapArray[i, width].GetComponent<GridCell>().isOccupied = false;
+                        block.transform.position = mapArray[height, width].transform.position;
+                        //mapArray[height, width] = temp;
+                        block.GetComponent<Block>().CurPosArr = new Vector2Int(height, width);
+                        mapArray[height, width].GetComponent<GridCell>().isOccupied = true;
+
+                    }
+
+                }
+            }
+            if (dir == Vector2.down)
+            {
+                int i;
+                int height;
+                for (i = (int)block.GetComponent<Block>().CurPosArr.x, height = i - 1; i >= 0 && height >= 0; i--)
+                {
+                    //var height = i++;
+                    var width = (int)block.GetComponent<Block>().CurPosArr.y;
+                    if (!mapArray[height, width].GetComponent<GridCell>().isOccupied)
+                    {
+                        //GameObject temp = mapArray[i, width];
+                        mapArray[i, width].GetComponent<GridCell>().isOccupied = false;
+                        block.transform.position = mapArray[height, width].transform.position;
+                        //mapArray[height, width] = temp;
+                        block.GetComponent<Block>().CurPosArr = new Vector2Int(height, width);
+                        mapArray[height, width].GetComponent<GridCell>().isOccupied = true;
+
+                    }
+                }
+
+            }
+
+
+
+            else if (dir == Vector2.left)
+            {
+                int j, width;
+                for (j = (int)block.GetComponent<Block>().CurPosArr.y, width = j - 1; j >= 0 && width >= 0; j--)
+                {
+                    var height = (int)block.GetComponent<Block>().CurPosArr.x;
+                    if (!mapArray[height, width].GetComponent<GridCell>().isOccupied)
+                    {
+                        //GameObject temp = mapArray[i, width];
+                        mapArray[height, j].GetComponent<GridCell>().isOccupied = false;
+                        block.transform.position = mapArray[height, width].transform.position;
+                        //mapArray[height, width] = temp;
+                        block.GetComponent<Block>().CurPosArr = new Vector2Int(height, width);
+                        mapArray[height, width].GetComponent<GridCell>().isOccupied = true;
+
+                    }
+
+
+
+
+                }
+            }
+            else if (dir == Vector2.right)
+            {
+                int j, width;
+                for (j = (int)block.GetComponent<Block>().CurPosArr.y, width = j + 1; j < mapWidth && width < mapWidth; j++)
+                {
+                    var height = (int)block.GetComponent<Block>().CurPosArr.x;
+                    if (!mapArray[height, width].GetComponent<GridCell>().isOccupied)
+                    {
+                        //GameObject temp = mapArray[i, width];
+                        mapArray[height, j].GetComponent<GridCell>().isOccupied = false;
+                        block.transform.position = mapArray[height, width].transform.position;
+                        //mapArray[height, width] = temp;
+                        block.GetComponent<Block>().CurPosArr = new Vector2Int(height, width);
+                        mapArray[height, width].GetComponent<GridCell>().isOccupied = true;
+
+                    }
+                }
+            }
 
 
 
 
 
+            //}
+
+            //GridCell GetNodeAtPosition(Vector2 pos)
+            //{
+            //    return _nodes.FirstOrDefault(n => n.Pos == pos);
+            //}
+
+            //void RemoveBlock(Block block)
+            //{
+            //    _blocks.Remove(block);
+            //    Destroy(block.gameObject);
+            //}
+
+        }
     }
-
-    GridCell GetNodeAtPosition(Vector2 pos)
-    {
-        return _nodes.FirstOrDefault(n => n.Pos == pos);
-    }
-
 }
-
 
