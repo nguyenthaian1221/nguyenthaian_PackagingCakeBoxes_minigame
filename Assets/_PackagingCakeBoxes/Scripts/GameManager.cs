@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
-using static Unity.Collections.AllocatorManager;
 using System.Linq;
 
 public enum GameState { pause, playing, moving, lose, win };
@@ -180,6 +179,11 @@ public class GameManager : MonoBehaviour
 
         foreach (var block in orderedBlocks)
         {
+            if (!block.gameObject.activeSelf)
+            {
+                continue;
+            }
+
             //Debug.Log(block.name);
             if (dir == Vector2.up)
             {
@@ -187,8 +191,45 @@ public class GameManager : MonoBehaviour
                 int height;
                 for (i = (int)block.GetComponent<Block>().CurPosArr.x, height = i + 1; i < mapHeight && height < mapHeight; i++)
                 {
+                    //Debug.Log(block.tag + " " + i);
+
                     //var height = i++;
                     var width = (int)block.GetComponent<Block>().CurPosArr.y;
+
+                    if (block.tag == "box")
+                    {
+                        if (mapArray[height, width].GetComponent<GridCell>().isOccupied)
+                        {
+                            if (mapArray[height, width].GetComponent<GridCell>().OccupiedBlock.tag == "cake")
+                            {
+
+                                // Xoa object
+                                mapArray[height, width].GetComponent<GridCell>().OccupiedBlock.gameObject.SetActive(false);
+                                mapArray[height, width].GetComponent<GridCell>().isOccupied = false;
+                                // Di chuyen toi vi tri moi
+                                block.transform.position = mapArray[height, width].transform.position;
+                                block.GetComponent<Block>().CurPosArr = new Vector2Int(height, width);
+                                block.GetComponent<Block>().SetBlock(mapArray[height, width].GetComponent<GridCell>());
+                                mapArray[height, width].GetComponent<GridCell>().isOccupied = true;
+                                mapArray[height - 1, width].GetComponent<GridCell>().isOccupied = false;
+                            }
+                            else if (mapArray[height, width].GetComponent<GridCell>().OccupiedBlock.tag == "coin")
+                            {
+
+                                // Xoa object
+                                mapArray[height, width].GetComponent<GridCell>().OccupiedBlock.gameObject.SetActive(false);
+                                mapArray[height, width].GetComponent<GridCell>().isOccupied = false;
+                                // Di chuyen toi vi tri moi
+                                block.transform.position = mapArray[height, width].transform.position;
+                                block.GetComponent<Block>().CurPosArr = new Vector2Int(height, width);
+                                block.GetComponent<Block>().SetBlock(mapArray[height, width].GetComponent<GridCell>());
+                                mapArray[height, width].GetComponent<GridCell>().isOccupied = true;
+                                mapArray[height - 1, width].GetComponent<GridCell>().isOccupied = false;
+                            }
+
+                        }
+                    }
+
                     while (!mapArray[height, width].GetComponent<GridCell>().isOccupied)
                     {
                         //GameObject temp = mapArray[i, width];
@@ -197,6 +238,7 @@ public class GameManager : MonoBehaviour
                         //mapArray[height, width] = temp;
                         block.GetComponent<Block>().CurPosArr = new Vector2Int(height, width);
                         mapArray[height, width].GetComponent<GridCell>().isOccupied = true;
+                        block.GetComponent<Block>().SetBlock(mapArray[height, width].GetComponent<GridCell>());
 
                         //Debug.Log("Height: " + height);
                         var temp = height;
@@ -205,10 +247,12 @@ public class GameManager : MonoBehaviour
                             if (!mapArray[temp, width].GetComponent<GridCell>().isOccupied)
                             {
                                 mapArray[height, width].GetComponent<GridCell>().isOccupied = false;
+                                //block.GetComponent<Block>().SetBlock(null);
                             }
                             else
                             {
                                 mapArray[height, width].GetComponent<GridCell>().isOccupied = true;
+                                block.GetComponent<Block>().SetBlock(mapArray[height, width].GetComponent<GridCell>());
                             }
 
                             height++;
@@ -227,6 +271,47 @@ public class GameManager : MonoBehaviour
                 {
                     //var height = i++;
                     var width = (int)block.GetComponent<Block>().CurPosArr.y;
+
+                    if (block.tag == "cake")
+                    {
+                        if (mapArray[height, width].GetComponent<GridCell>().isOccupied)
+                        {
+                            if (mapArray[height, width].GetComponent<GridCell>().OccupiedBlock.tag == "box")
+                            {
+
+                                // Di chuyen toi vi tri moi
+                                block.transform.position = mapArray[height, width].transform.position;
+                                block.GetComponent<Block>().CurPosArr = new Vector2Int(height, width);
+                                // Xoa object
+                                mapArray[height + 1, width].GetComponent<GridCell>().isOccupied = false;
+                                mapArray[height + 1, width].GetComponent<GridCell>().OccupiedBlock = null;
+                                block.gameObject.SetActive(false);
+                            }
+
+                        }
+                    }
+                    else if (block.tag == "coin")
+                    {
+                        if (mapArray[height, width].GetComponent<GridCell>().isOccupied)
+                        {
+                            if (mapArray[height, width].GetComponent<GridCell>().OccupiedBlock.tag == "box")
+                            {
+
+                                // Di chuyen toi vi tri moi
+                                block.transform.position = mapArray[height, width].transform.position;
+                                block.GetComponent<Block>().CurPosArr = new Vector2Int(height, width);
+                                // Xoa object
+                                mapArray[height + 1, width].GetComponent<GridCell>().isOccupied = false;
+                                mapArray[height + 1, width].GetComponent<GridCell>().OccupiedBlock = null;
+                                block.gameObject.SetActive(false);
+                            }
+
+                        }
+                    }
+
+
+
+
                     while (!mapArray[height, width].GetComponent<GridCell>().isOccupied)
                     {
                         //GameObject temp = mapArray[i, width];
@@ -235,6 +320,7 @@ public class GameManager : MonoBehaviour
                         //mapArray[height, width] = temp;
                         block.GetComponent<Block>().CurPosArr = new Vector2Int(height, width);
                         mapArray[height, width].GetComponent<GridCell>().isOccupied = true;
+                        block.GetComponent<Block>().SetBlock(mapArray[height, width].GetComponent<GridCell>());
                         var temp = height;
                         if (--temp >= 0)
                         {
@@ -245,6 +331,7 @@ public class GameManager : MonoBehaviour
                             else
                             {
                                 mapArray[height, width].GetComponent<GridCell>().isOccupied = true;
+                                block.GetComponent<Block>().SetBlock(mapArray[height, width].GetComponent<GridCell>());
                             }
 
                             height--;
@@ -270,6 +357,7 @@ public class GameManager : MonoBehaviour
                         //mapArray[height, width] = temp;
                         block.GetComponent<Block>().CurPosArr = new Vector2Int(height, width);
                         mapArray[height, width].GetComponent<GridCell>().isOccupied = true;
+                        block.GetComponent<Block>().SetBlock(mapArray[height, width].GetComponent<GridCell>());
                         var temp = width;
                         if (--temp >= 0)
                         {
@@ -280,6 +368,7 @@ public class GameManager : MonoBehaviour
                             else
                             {
                                 mapArray[height, width].GetComponent<GridCell>().isOccupied = true;
+                                block.GetComponent<Block>().SetBlock(mapArray[height, width].GetComponent<GridCell>());
                             }
                             width--;
                         }
@@ -304,6 +393,7 @@ public class GameManager : MonoBehaviour
                         //mapArray[height, width] = temp;
                         block.GetComponent<Block>().CurPosArr = new Vector2Int(height, width);
                         mapArray[height, width].GetComponent<GridCell>().isOccupied = true;
+                        block.GetComponent<Block>().SetBlock(mapArray[height, width].GetComponent<GridCell>());
                         var temp = width;
                         if (++temp < mapWidth)
                         {
@@ -314,6 +404,7 @@ public class GameManager : MonoBehaviour
                             else
                             {
                                 mapArray[height, width].GetComponent<GridCell>().isOccupied = true;
+                                block.GetComponent<Block>().SetBlock(mapArray[height, width].GetComponent<GridCell>());
                             }
                             width++;
                         }
@@ -327,9 +418,15 @@ public class GameManager : MonoBehaviour
 
             //}
 
-            //GridCell GetNodeAtPosition(Vector2 pos)
+            //Block GetNodeAtPosition(Vector2Int pos)
             //{
-            //    return _nodes.FirstOrDefault(n => n.Pos == pos);
+            //    foreach (var b in _blocks)
+            //    {
+            //        if (b.GetComponents<Block>(). == pos)
+            //        {
+
+            //        }
+            //    }
             //}
 
             //void RemoveBlock(Block block)
