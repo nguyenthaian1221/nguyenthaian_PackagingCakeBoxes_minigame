@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
 using System.Linq;
+using GG.Infrastructure.Utils.Swipe;
 
 public enum GameState { pause, playing, moving, lose, win };
 
@@ -24,7 +25,50 @@ public class GameManager : MonoBehaviour
     public Transform parentGrid;
 
     //private List<GridCell> _nodes;
-    private List<GameObject> _blocks;
+    private List<GameObject> _blocks;  // movable objects
+    private List<GameObject> _notMovingBlocks;  // movable objects
+
+    private int cakeCount;
+
+
+    [SerializeField] private SwipeListener swipeListener;
+
+
+
+
+    // Register Event Swipe
+
+    private void OnEnable()
+    {
+        swipeListener.OnSwipe.AddListener(OnSwipe);
+    }
+
+    private void OnDisable()
+    {
+        swipeListener.OnSwipe.RemoveListener(OnSwipe);
+    }
+
+
+    private void OnSwipe(string swipe)
+    {
+        switch (swipe)
+        {
+            case "Up":
+                Shift(Vector2.up);
+                break;
+            case "Down":
+                Shift(Vector2.down);
+                break;
+            case "Left":
+                Shift(Vector2.left);
+                break;
+            case "Right":
+                Shift(Vector2.right);
+                break;
+
+
+        }
+    }
 
 
 
@@ -34,11 +78,19 @@ public class GameManager : MonoBehaviour
         instance ??= this;
     }
 
+    // will subscribe more event here
+
+
+
+
     void Start()
     {
         _blocks = new List<GameObject>();
+        _notMovingBlocks = new List<GameObject>();
         ChangeState(GameState.playing);
         LoadMap();
+        EventManager.OnTimerStart();
+
     }
 
     // Update is called once per frame
@@ -51,6 +103,7 @@ public class GameManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.UpArrow)) Shift(Vector2.up);
         if (Input.GetKeyDown(KeyCode.DownArrow)) Shift(Vector2.down);
     }
+
 
 
     private void ChangeState(GameState newState)
@@ -87,6 +140,7 @@ public class GameManager : MonoBehaviour
                 grid.transform.position = new Vector3(j, i, 0) * 2;
                 grid.transform.parent = parentGrid;
                 mapArray[i, j] = grid;
+                _notMovingBlocks.Add(grid);
             }
         }
         //Debug.LogError(mapArray[0, 0].GetComponent<GridCell>().isOccupied + "|| an generategrid");
@@ -97,7 +151,7 @@ public class GameManager : MonoBehaviour
     {
 
         //bool isMap = false;
-        string filePath = Application.dataPath + "/_PackagingCakeBoxes" + "/Level/level10.txt";
+        string filePath = Application.dataPath + "/_PackagingCakeBoxes" + "/Level/level4.txt";
 
         if (!File.Exists(filePath)) return;
 
@@ -142,8 +196,16 @@ public class GameManager : MonoBehaviour
                             blockObjects.GetComponent<Block>().SetBlock(mapArray[mapHeight - 1 - y, x].GetComponent<GridCell>());
                             if (currentNumber != 3)  // candyBlock can't move
                             {
+                                if (currentNumber == 1)
+                                {
+                                    cakeCount++;
+                                }
                                 blockObjects.GetComponent<Block>().CurPosArr = new Vector2Int(mapHeight - 1 - y, x); //Save init 
                                 _blocks.Add(blockObjects);
+                            }
+                            else
+                            {
+                                _notMovingBlocks.Add(blockObjects);
                             }
 
                         }
@@ -212,6 +274,7 @@ public class GameManager : MonoBehaviour
                                 block.GetComponent<Block>().SetBlock(mapArray[height, width].GetComponent<GridCell>());
                                 mapArray[height, width].GetComponent<GridCell>().isOccupied = true;
                                 mapArray[height - 1, width].GetComponent<GridCell>().isOccupied = false;
+                                CheckWin();
                             }
                             else if (mapArray[height, width].GetComponent<GridCell>().OccupiedBlock.tag == "coin")
                             {
@@ -286,6 +349,7 @@ public class GameManager : MonoBehaviour
                                 mapArray[height + 1, width].GetComponent<GridCell>().isOccupied = false;
                                 mapArray[height + 1, width].GetComponent<GridCell>().OccupiedBlock = null;
                                 block.gameObject.SetActive(false);
+                                CheckWin();
                             }
 
                         }
@@ -416,24 +480,30 @@ public class GameManager : MonoBehaviour
 
 
 
-            //}
 
-            //Block GetNodeAtPosition(Vector2Int pos)
-            //{
-            //    foreach (var b in _blocks)
-            //    {
-            //        if (b.GetComponents<Block>(). == pos)
-            //        {
 
-            //        }
-            //    }
-            //}
-
-            //void RemoveBlock(Block block)
-            //{
-            //    _blocks.Remove(block);
-            //    Destroy(block.gameObject);
-            //}
+        }
+    }
+    private void CheckWin()
+    {
+        cakeCount--;
+        if (cakeCount == 0)
+        {
+            Debug.LogError("You win!!!");
+            EventManager.OnTimerStop();
+            var res = Timer.Instance.TimeToDisplay;
+            if (res > 0 && res <= 15)
+            {
+                Debug.Log("Duoc 1 sao");
+            }
+            else if (res > 15 && res <= 30)
+            {
+                Debug.Log("Duoc 2 sao");
+            }
+            else if (res > 30 && res <= 45)
+            {
+                Debug.Log("Duoc 3 sao");
+            }
 
         }
     }
