@@ -442,7 +442,7 @@ public class GameManager : MonoBehaviour
                     }
 
 
-
+                    if (height < 0) continue;
 
                     while (!mapArray[height, width].GetComponent<GridCell>().isOccupied)
                     {
