@@ -52,7 +52,7 @@ namespace LevelUnlockSystem
             }
         }
 
-        private void OnEnable()
+        private void Start()
         {
             SaveLoadData.Instance.Initialized();
         }

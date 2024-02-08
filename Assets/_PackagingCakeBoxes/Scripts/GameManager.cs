@@ -6,8 +6,9 @@ using System.IO;
 using System.Linq;
 using GG.Infrastructure.Utils.Swipe;
 using DG.Tweening;
+using static UnityEditor.Progress;
 
-public enum GameState { pause, playing, moving, lose, win };
+public enum GameState { pause, playing, moving, lose, win, selectLevel };
 
 
 public class GameManager : MonoBehaviour
@@ -22,7 +23,7 @@ public class GameManager : MonoBehaviour
     public GameObject background;
 
     public GameObject[,] mapArray;
-    public GameObject[] objects;  // 0 - gird, 1 - cake, 2 - box, 3 - candyblock, 4 - coin 
+    public GameObject[] objects;  // 0 - gird, 1 - cake, 2 - box, 3 - candyblock, 4 - coin || Never delete this
     public Transform parentGrid;
 
     //private List<GridCell> _nodes;
@@ -33,7 +34,12 @@ public class GameManager : MonoBehaviour
 
 
     [SerializeField] private SwipeListener swipeListener;
-
+    [SerializeField] private GameObject panel_gameplay;
+    [SerializeField] private GameObject panel_lose;
+    [SerializeField] private GameObject panel_win;
+    [SerializeField] private GameObject panel_selectlevel;
+    [SerializeField] private GameObject panel_guide;
+    [SerializeField] private GameObject panel_menu;
 
 
 
@@ -52,6 +58,8 @@ public class GameManager : MonoBehaviour
 
     private void OnSwipe(string swipe)
     {
+        if (gameState != GameState.playing) return;
+
         switch (swipe)
         {
             case "Up":
@@ -88,10 +96,13 @@ public class GameManager : MonoBehaviour
     {
         _blocks = new List<GameObject>();
         _notMovingBlocks = new List<GameObject>();
-        ChangeState(GameState.playing);
-        LoadMap();
-        EventManager.OnTimerStart();
 
+        // the default state is select level
+        ChangeState(GameState.selectLevel);
+        //LoadMap(4);
+        //EventManager.OnTimerStart();  // start time unity 
+        InitPanel();
+        Debug.Log(Application.persistentDataPath);
     }
 
     // Update is called once per frame
@@ -121,6 +132,8 @@ public class GameManager : MonoBehaviour
                 break;
             case GameState.win:
                 break;
+            case GameState.selectLevel:
+                break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(newState), newState, null);
 
@@ -148,11 +161,12 @@ public class GameManager : MonoBehaviour
         return mapArray;
     }
 
-    void LoadMap()  // insert parameter
+    void LoadMap(int level)  // insert parameter
     {
 
+        string levelstring = String.Format("/level/level{0}.txt", level);
         //bool isMap = false;
-        string filePath = Application.dataPath + "/_PackagingCakeBoxes" + "/Level/level4.txt";
+        string filePath = Application.dataPath + "/_PackagingCakeBoxes" + levelstring;
 
         if (!File.Exists(filePath)) return;
 
@@ -278,7 +292,7 @@ public class GameManager : MonoBehaviour
                                 mapArray[height, width].GetComponent<GridCell>().isOccupied = true;
                                 mapArray[height - 1, width].GetComponent<GridCell>().isOccupied = false;
                                 sequence.Insert(0, block.transform.DOMove(outputPosition, 0.25f));
-                            
+
 
                                 sequence.OnComplete(() =>
                                 {
@@ -302,7 +316,7 @@ public class GameManager : MonoBehaviour
                                 mapArray[height, width].GetComponent<GridCell>().isOccupied = true;
                                 mapArray[height - 1, width].GetComponent<GridCell>().isOccupied = false;
                                 block.transform.DOMove(outputPosition, 0.25f);
-                              
+
 
                             }
 
@@ -554,5 +568,53 @@ public class GameManager : MonoBehaviour
 
         }
     }
+
+
+
+    // Retry 
+    private void ResetMap(int level)
+    {
+        // reset state
+        ChangeState(GameState.playing);
+        // Delete object and reset list
+        ResetList();
+        // Reset list
+        // spawn new object
+        cakeCount = 0;
+
+        LoadMap(level);
+        //spawn lai 
+    }
+
+    [ContextMenu("ResetList")]
+    public void ResetList()
+    {
+        mapArray = null;
+
+        foreach (var item1 in _blocks)
+        {
+            Destroy(item1.gameObject);
+        }
+
+        foreach (var item2 in _notMovingBlocks)
+        {
+            Destroy(item2.gameObject);
+        }
+
+        _blocks.Clear();
+        _notMovingBlocks.Clear();
+    }
+
+    public void InitPanel()
+    {
+        panel_gameplay.SetActive(false);
+        panel_lose.SetActive(false);
+        panel_win.SetActive(false);
+        panel_selectlevel.SetActive(false);
+        panel_guide.SetActive(false);
+        panel_menu.SetActive(true);
+    }
+
+
 }
 

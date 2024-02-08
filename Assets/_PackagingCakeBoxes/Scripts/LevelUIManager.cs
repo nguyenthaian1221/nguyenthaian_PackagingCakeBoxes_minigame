@@ -25,18 +25,12 @@ namespace LevelUnlockSystem
             for (int i = 0; i < levelItemArr.Length; i++)
             {
                 LevelBtnScript levelButton = Instantiate(levelBtnPrefab, levelBtnGridHolder.transform);
-                levelButton.SetLevelButton(levelItemArr[i],i,i==LevelSystemManager.Instance.LevelData.lastUnlockedLevel);
+                levelButton.SetLevelButton(levelItemArr[i],i);
             }
-
-
 
         }
 
-
     }
-
-
-
 
 }
 

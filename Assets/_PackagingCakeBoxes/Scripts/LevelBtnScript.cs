@@ -1,33 +1,40 @@
 using LevelUnlockSystem;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
+using System;
 
 public class LevelBtnScript : MonoBehaviour
 {
 
     private int levelIndex;
-    private Button btn;
-    private GameObject activeLevelIndicator;
-    private Image[] starsArray;
-
-
+    [SerializeField] private Button btn;
+    //private GameObject activeLevelIndicator;
+    [SerializeField] private GameObject[] starsArray;
+    [SerializeField] private TMP_Text levelText;
+    [SerializeField] private GameObject lockIcon;
 
     private void Start()
     {
-        btn.onClick.AddListener(() => Onclick());    
+        btn.onClick.AddListener(() => Onclick());
     }
 
-    public void SetLevelButton(LevelItem value, int index, bool activeLevel)
+    public void SetLevelButton(LevelItem value, int index)
     {
+        levelIndex = index + 1;
+        levelText.text = "" + levelIndex;
         if (value.unlocked)
         {
-            levelIndex = index + 1;
+            levelText.gameObject.SetActive(true);
+            lockIcon.SetActive(false);
             btn.interactable = true;
-            activeLevelIndicator.SetActive(activeLevel);
+            //activeLevelIndicator.SetActive(activeLevel);
             SetStar(value.starAchieved);
         }
         else
         {
+            levelText.gameObject.SetActive(false);
+            lockIcon.SetActive(true);
             btn.interactable = false;
         }
 
@@ -35,16 +42,29 @@ public class LevelBtnScript : MonoBehaviour
 
     private void SetStar(int starAchieved)
     {
-        for (int i = 0; i < starsArray.Length; i++)
+        Debug.Log("Da vao set star " + starAchieved);
+        switch (starAchieved)
         {
-            if (i < starAchieved)
-            {
-
-            }
-            else
-            {
-
-            }
+            case 0:
+                starsArray[0].SetActive(false);
+                starsArray[1].SetActive(false);
+                starsArray[2].SetActive(false);
+                break;
+            case 1:
+                starsArray[0].SetActive(true);
+                starsArray[1].SetActive(false);
+                starsArray[2].SetActive(false);
+                break;
+            case 2:
+                starsArray[0].SetActive(true);
+                starsArray[1].SetActive(true);
+                starsArray[2].SetActive(false);
+                break;
+            case 3:
+                starsArray[0].SetActive(true);
+                starsArray[1].SetActive(true);
+                starsArray[2].SetActive(true);
+                break;
         }
     }
 
@@ -52,7 +72,7 @@ public class LevelBtnScript : MonoBehaviour
     {
         LevelSystemManager.Instance.CurrentLevel = levelIndex - 1;
         // LoadLevel
-
+        Debug.Log("Level" + levelIndex);
     }
 
 
