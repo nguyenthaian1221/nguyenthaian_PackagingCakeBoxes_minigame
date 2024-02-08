@@ -311,6 +311,7 @@ public class GameManager : MonoBehaviour
                                 {
                                     //Debug.Log("OnComplete: " + i);
                                     CheckWin();
+                                    //Debug.Log("Checkwin()");
                                 });
 
 
@@ -404,8 +405,9 @@ public class GameManager : MonoBehaviour
                                 {
                                     block.gameObject.SetActive(false);
                                     CheckWin();
+                                    Debug.Log("Checkwin()");
                                 });
-
+                                height--;
 
 
                             }
@@ -433,7 +435,7 @@ public class GameManager : MonoBehaviour
                                 {
                                     block.gameObject.SetActive(false);
                                 });
-
+                                height--;
                             }
 
                         }
