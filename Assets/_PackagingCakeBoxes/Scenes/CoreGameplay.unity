@@ -1104,7 +1104,7 @@ MonoBehaviour:
   - {fileID: 5386251791931824727, guid: b99128f38e47edf4480877f88571a00f, type: 3}
   - {fileID: 761762134338233856, guid: eee873349ed6db646a63ef1e033d3aa1, type: 3}
   parentGrid: {fileID: 1878440264}
-  swipeListener: {fileID: 0}
+  swipeListener: {fileID: 1494336910}
 --- !u!1 &758603302
 GameObject:
   m_ObjectHideFlags: 0
@@ -2146,7 +2146,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1294231306
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2413,7 +2413,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1436480280}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: afb84f04a0e5ca647b6d0c301c04d694, type: 3}
   m_Name: 
