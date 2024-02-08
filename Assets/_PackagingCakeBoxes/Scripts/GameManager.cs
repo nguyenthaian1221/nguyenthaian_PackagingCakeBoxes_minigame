@@ -7,6 +7,7 @@ using System.Linq;
 using GG.Infrastructure.Utils.Swipe;
 using DG.Tweening;
 using static UnityEditor.Progress;
+using LevelUnlockSystem;
 
 public enum GameState { pause, playing, moving, lose, win, selectLevel };
 
@@ -40,6 +41,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject panel_selectlevel;
     [SerializeField] private GameObject panel_guide;
     [SerializeField] private GameObject panel_menu;
+    [SerializeField] private GameObject Canvas_result;
 
 
 
@@ -48,11 +50,13 @@ public class GameManager : MonoBehaviour
     private void OnEnable()
     {
         swipeListener.OnSwipe.AddListener(OnSwipe);
+        EventManager.TimerStop += EventManagerOnTimerStop;
     }
 
     private void OnDisable()
     {
         swipeListener.OnSwipe.RemoveListener(OnSwipe);
+        EventManager.TimerStop -= EventManagerOnTimerStop;
     }
 
 
@@ -79,7 +83,10 @@ public class GameManager : MonoBehaviour
         }
     }
 
-
+    private void EventManagerOnTimerStop()
+    {
+        ChangeState(GameState.lose);
+    }
 
 
     private void Awake()
@@ -127,10 +134,16 @@ public class GameManager : MonoBehaviour
             case GameState.pause:
                 break;
             case GameState.playing:
+                EventManager.OnTimerStart();
                 break;
             case GameState.lose:
+                Canvas_result.SetActive(true);
+                panel_lose.SetActive(true);
                 break;
             case GameState.win:
+                Canvas_result.SetActive(true);
+                panel_win.SetActive(true);
+                //LevelUIManager.Instance.InitializedUI();
                 break;
             case GameState.selectLevel:
                 break;
@@ -239,7 +252,7 @@ public class GameManager : MonoBehaviour
 
         // Spawn Background
         var center = new Vector2(mapWidth - 1, mapHeight - 1);
-        var board = Instantiate(background, center, Quaternion.identity);
+        //var board = Instantiate(background, center, Quaternion.identity);
 
         //Setting camera
         Camera.main.transform.position = new Vector3(center.x, center.y, -10);
@@ -293,9 +306,10 @@ public class GameManager : MonoBehaviour
                                 mapArray[height - 1, width].GetComponent<GridCell>().isOccupied = false;
                                 sequence.Insert(0, block.transform.DOMove(outputPosition, 0.25f));
 
-
+                                //Debug.Log("OnComplete: " + i);
                                 sequence.OnComplete(() =>
                                 {
+                                    //Debug.Log("OnComplete: " + i);
                                     CheckWin();
                                 });
 
@@ -551,29 +565,34 @@ public class GameManager : MonoBehaviour
         if (cakeCount == 0)
         {
             Debug.LogError("You win!!!");
-            EventManager.OnTimerStop();
+            EventManager.OnTimerPausing();
             var res = Timer.Instance.TimeToDisplay;
+            var startReturn = 0;
+            ChangeState(GameState.win);
             if (res > 0 && res <= 15)
             {
-                Debug.Log("Duoc 1 sao");
+                //Debug.Log("Duoc 1 sao");
+                startReturn = 1;
             }
             else if (res > 15 && res <= 30)
             {
-                Debug.Log("Duoc 2 sao");
+                //Debug.Log("Duoc 2 sao");
+                startReturn = 2;
             }
             else if (res > 30 && res <= 45)
             {
-                Debug.Log("Duoc 3 sao");
+                startReturn = 3;
             }
-
+            GameUI.Instance.GameOver(startReturn);
         }
     }
 
 
 
     // Retry 
-    private void ResetMap(int level)
+    public void ResetMap()
     {
+        Timer.Instance.ResetTimer();
         // reset state
         ChangeState(GameState.playing);
         // Delete object and reset list
@@ -582,7 +601,7 @@ public class GameManager : MonoBehaviour
         // spawn new object
         cakeCount = 0;
 
-        LoadMap(level);
+        LoadMap(LevelSystemManager.Instance.CurrentLevel + 1); // add 1 unit because array start from 0
         //spawn lai 
     }
 
@@ -613,8 +632,42 @@ public class GameManager : MonoBehaviour
         panel_selectlevel.SetActive(false);
         panel_guide.SetActive(false);
         panel_menu.SetActive(true);
+        Canvas_result.SetActive(false);
     }
 
+
+    public void StartAGame(int level)
+    {
+        Timer.Instance.ResetTimer();
+        ChangeState(GameState.playing);
+        cakeCount = 0;
+        panel_selectlevel.SetActive(false);
+        panel_gameplay.SetActive(true);
+
+        LoadMap(level);
+    }
+
+
+    public void ReturnSelectMenu()
+    {
+        LevelUIManager.Instance.ResetList();
+        ChangeState(GameState.selectLevel);
+        EventManager.OnTimerPausing();
+        ResetList();
+    }
+
+    public void NextLevelGame()
+    {
+        LevelSystemManager.Instance.CurrentLevel++;
+
+        ChangeState(GameState.playing);
+        ResetList();
+        // Reset list
+        // spawn new object
+        cakeCount = 0;
+        Timer.Instance.ResetTimer();
+        LoadMap(LevelSystemManager.Instance.CurrentLevel + 1);
+    }
 
 }
 

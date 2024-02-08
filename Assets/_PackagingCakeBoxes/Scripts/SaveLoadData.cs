@@ -50,7 +50,7 @@ namespace LevelUnlockSystem
 
 
         }
-        private void LoadData()
+        public void LoadData()
         {
             try
             {

@@ -10,24 +10,34 @@ namespace LevelUnlockSystem
 {
     public class GameUI : MonoBehaviour
     {
-        [SerializeField] private Image[] starsArray;
-        [SerializeField] private Sprite[] spritesArray;
-        [SerializeField] private Text levelStatusText;
-        [SerializeField] private GameObject overPanel;
+        [SerializeField] private GameObject[] starsArray;
+        //[SerializeField] private Sprite[] spritesArray;
+        //[SerializeField] private Text levelStatusText;
+        [SerializeField] private GameObject overWinPanel;
+        [SerializeField] private GameObject overLosePanel;
+
+
+
+        public static GameUI Instance;
+
+        private void Awake()
+        {
+            Instance ??= this;
+        }
 
 
         public void GameOver(int starCount)
         {
-            if (starCount > 0)
+            if (starCount > 0)   // Win condition
             {
-                levelStatusText.text = "Level " + (LevelSystemManager.Instance.CurrentLevel + 1) + " Completed";
+                //levelStatusText.text = "Level " + (LevelSystemManager.Instance.CurrentLevel + 1) + " Completed";
                 LevelSystemManager.Instance.LevelComplete(starCount);
             }
-            else
-            {
-                levelStatusText.text = "Level " + (LevelSystemManager.Instance.CurrentLevel + 1) + " Failed";
+            // else     // Lose condition
+            //{
+            //levelStatusText.text = "Level " + (LevelSystemManager.Instance.CurrentLevel + 1) + " Failed";
 
-            }
+            //}
 
             SetStar(starCount);
         }
@@ -36,24 +46,31 @@ namespace LevelUnlockSystem
 
         private void SetStar(int starAchieved)
         {
-            for (int i = 0; i < starsArray.Length; i++)
+
+            switch (starAchieved)
             {
-                if (i < starAchieved)
-                {
-
-                }
-                else
-                {
-
-                }
+                case 0:
+                    starsArray[0].SetActive(false);
+                    starsArray[1].SetActive(false);
+                    starsArray[2].SetActive(false);
+                    break;
+                case 1:
+                    starsArray[0].SetActive(true);
+                    starsArray[1].SetActive(false);
+                    starsArray[2].SetActive(false);
+                    break;
+                case 2:
+                    starsArray[0].SetActive(true);
+                    starsArray[1].SetActive(true);
+                    starsArray[2].SetActive(false);
+                    break;
+                case 3:
+                    starsArray[0].SetActive(true);
+                    starsArray[1].SetActive(true);
+                    starsArray[2].SetActive(true);
+                    break;
             }
         }
-
-        public void OkBtn()
-        {
-            // LoadMap
-        }
-
 
 
     }

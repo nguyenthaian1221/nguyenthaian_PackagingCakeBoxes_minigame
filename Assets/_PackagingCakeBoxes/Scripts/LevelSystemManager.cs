@@ -54,7 +54,7 @@ namespace LevelUnlockSystem
 
         private void Start()
         {
-            SaveLoadData.Instance.Initialized();
+           
         }
 
 
@@ -68,13 +68,18 @@ namespace LevelUnlockSystem
 
         public void LevelComplete(int starAchieved)                             //method called when player win the level
         {
-            levelData.levelItemArray[currentLevel].starAchieved = starAchieved;    //save the stars achieved by the player in level
+            if(starAchieved > levelData.levelItemArray[currentLevel].starAchieved)
+            {
+                levelData.levelItemArray[currentLevel].starAchieved = starAchieved;    //save the stars achieved by the player in level
+                SaveLoadData.Instance.SaveData();
+            }
+            
             if (levelData.lastUnlockedLevel < (currentLevel + 1))
             {
                 levelData.lastUnlockedLevel = currentLevel + 1;           //change the lastUnlockedLevel to next level
                                                                           //and make next level unlock true
                 levelData.levelItemArray[levelData.lastUnlockedLevel].unlocked = true;
-                //SaveLoadData.Instance.SaveData();
+                SaveLoadData.Instance.SaveData();
             }
         }
 

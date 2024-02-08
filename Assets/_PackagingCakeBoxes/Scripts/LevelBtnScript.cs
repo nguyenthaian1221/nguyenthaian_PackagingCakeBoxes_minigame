@@ -73,6 +73,8 @@ public class LevelBtnScript : MonoBehaviour
         LevelSystemManager.Instance.CurrentLevel = levelIndex - 1;
         // LoadLevel
         Debug.Log("Level" + levelIndex);
+
+        GameManager.instance.StartAGame(levelIndex);
     }
 
 

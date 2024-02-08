@@ -7,7 +7,7 @@ public class Timer : MonoBehaviour
 
     public static Timer Instance;
 
-    private TMP_Text _timerText;
+    [SerializeField]private TMP_Text _timerText;
 
     enum TimerType { Countdown, Stopwatch }
 
@@ -22,8 +22,6 @@ public class Timer : MonoBehaviour
     private void Awake()
     {
         Instance ??= this;
-        _timerText = GetComponent<TMP_Text>();
-
 
     }
 
@@ -49,7 +47,7 @@ public class Timer : MonoBehaviour
 
 
     private void EventManagerOnTimerStop() => _isRunning = false;
-    private void EventManagerOnTimerPasuing() => _isRunning = false;
+    private void EventManagerOnTimerPasuing() => _isRunning = false;  // timer hasn't reach 0 
 
 
 
@@ -63,6 +61,7 @@ public class Timer : MonoBehaviour
         {
 
             EventManager.OnTimerStop();
+        
             return;
 
         }

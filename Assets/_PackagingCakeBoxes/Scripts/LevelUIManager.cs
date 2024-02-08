@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static Unity.Collections.AllocatorManager;
 
 
 namespace LevelUnlockSystem
@@ -9,12 +10,21 @@ namespace LevelUnlockSystem
     {
         [SerializeField] private GameObject levelBtnGridHolder;
         [SerializeField] private LevelBtnScript levelBtnPrefab;
+        private List<GameObject> arrBtn;
+        public static LevelUIManager Instance;
+
+        private void Awake()
+        {
+            Instance ??= this;
+        }
 
 
 
 
         private void Start()
         {
+            arrBtn = new List<GameObject>();
+            SaveLoadData.Instance.Initialized();
             InitializedUI();
         }
 
@@ -25,11 +35,25 @@ namespace LevelUnlockSystem
             for (int i = 0; i < levelItemArr.Length; i++)
             {
                 LevelBtnScript levelButton = Instantiate(levelBtnPrefab, levelBtnGridHolder.transform);
-                levelButton.SetLevelButton(levelItemArr[i],i);
+                arrBtn.Add(levelButton.gameObject);
+                levelButton.SetLevelButton(levelItemArr[i], i);
             }
 
         }
 
+
+        public void ResetList()
+        {
+            Debug.Log("Da xoa het buttn1");
+            foreach (var item1 in arrBtn)
+            {
+                Destroy(item1.gameObject);
+            }
+
+            arrBtn.Clear();
+            SaveLoadData.Instance.LoadData();
+            InitializedUI();
+        }
     }
 
 }
